@@ -35,3 +35,4 @@ To re-download all of your videos instead of just the newest added ones.
 - Add the ability to download playlists in mp4 format so you can have some playlists as videos.
 - Add the ability to choose the download folders instead of dumping into the current directory.
 - Make it so that when re-downloading all videos, old videos are purged. Sometimes the authors change the name of their videos so the old ones don't get overwritten when the new ones are downloaded.
+- Generate a shortcut which you can double-click to run the whole thing automatically
