@@ -24,15 +24,18 @@ def save_cookies(cookies, filename):
             file.write(f"{domain}\t{flag}\t{path}\t{secure}\t{expiration}\t{name}\t{value}\n")
     print(f"Cookies saved to {filename}", flush=True)
 
+# Get cookies
 cj = browser_cookie3.firefox(domain_name='youtube.com')
 save_cookies(cj, 'cookies.txt')
 
+# Check if ffmpeg is downloaded
 prereqs_ready = True
 if not os.path.isfile(os.path.join(os.getcwd(), 'ffmpeg/bin/ffmpeg.exe')):
     prereqs_ready = False
     print("FFmpeg not found - attempting to download automatically...", flush=True)
     import requests
     import zipfile
+    # Attempt to download ffmpeg
     try:
         zip_file_name = 'ffmpeg-n7.1-latest-win64-gpl-7.1.zip'
         zip_url = f"https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/{zip_file_name}"
@@ -60,6 +63,7 @@ if not os.path.isfile(os.path.join(os.getcwd(), 'ffmpeg/bin/ffmpeg.exe')):
         os.remove(zip_file_name)
         print("Cleanup complete.", flush=True)
 
+        # Check if ffmpeg was properly extracted
         if not os.path.isfile(os.path.join(os.getcwd(), 'ffmpeg/bin/ffmpeg.exe')):
             print("There was a problem with extracting the FFmpeg download. Please ensure ffmpeg/bin/ffmpeg.exe exists in the current directory.", flush=True)
         else:
@@ -67,11 +71,13 @@ if not os.path.isfile(os.path.join(os.getcwd(), 'ffmpeg/bin/ffmpeg.exe')):
             prereqs_ready = True
     except:
         print("Could not download FFmpeg automatically - see https://github.com/BtbN/FFmpeg-Builds/releases to download the latest version manually. Please ensure ffmpeg/bin/ffmpeg.exe is in the current directory before trying again.", flush=True)
-    
+
+# Check if yt-dlp is downloaded
 if not os.path.isfile(os.path.join(os.getcwd(), 'yt-dlp.exe')):
     prereqs_ready = False
     print("yt-dlp.exe not found - attempting to download automatically...", flush=True)
     import requests
+    # Attempt to download yt-dlp
     try:
         exe_url = "https://github.com/yt-dlp/yt-dlp/releases/download/2024.12.13/yt-dlp.exe"
 
@@ -93,13 +99,13 @@ if prereqs_ready:
         # Redownload all videos in the playlist even if they're already downloaded
         if len(sys.argv) > 1 and sys.argv[1] == 'force_redownload':
             os.remove('archive.txt')
+
         # Download videos with thumbnails
         process = subprocess.Popen('./yt-dlp.exe --ignore-errors --download-archive archive.txt -f ba --cookies cookies.txt "https://www.youtube.com/playlist?list=LL" --recode-video mp3 --embed-thumbnail --ffmpeg-location "ffmpeg/bin" -o "%(title)s.%(ext)s" --break-on-existing', stdout=subprocess.PIPE, text=True)
         for line in iter(process.stdout.readline, ""):
             print(line, end='', flush=True)
         process.wait()
 
-        full_download = False
         # Notify if finished downloading or if an error was encountered
         if process.returncode == 101:
             print("Successfully downloaded your newly added videos")
