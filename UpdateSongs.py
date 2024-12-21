@@ -2,6 +2,7 @@ import browser_cookie3
 import os
 import sys
 import subprocess
+import json
 
 # Saves the cookie to a file in Netscape format
 def save_cookies(cookies, filename):
@@ -96,24 +97,30 @@ if not os.path.isfile(os.path.join(os.getcwd(), 'yt-dlp.exe')):
         print("Could not download yt-dlp.exe automatically - see https://github.com/yt-dlp/yt-dlp/releases to download the latest version manually. Please ensure yt-dlp.exe is in the current directory before trying again.", flush=True)
 
 if prereqs_ready:
+        with open('config.json') as file:
+            config = json.load(file)
+            target_dir = config['download_directory']
+
+        args = config['args']
         # Redownload all videos in the playlist even if they're already downloaded
         if len(sys.argv) > 1 and sys.argv[1] == 'force_redownload':
             os.remove('archive.txt')
 
         # Download videos with thumbnails
-        process = subprocess.Popen('./yt-dlp.exe --ignore-errors --download-archive archive.txt -f ba --cookies cookies.txt "https://www.youtube.com/playlist?list=LL" --recode-video mp3 --embed-thumbnail --ffmpeg-location "ffmpeg/bin" -o "%(title)s.%(ext)s" --break-on-existing', stdout=subprocess.PIPE, text=True)
-        for line in iter(process.stdout.readline, ""):
-            print(line, end='', flush=True)
-        process.wait()
+        for url in config['playlists']:
+            process = subprocess.Popen(f"./yt-dlp.exe {url} -o \"{target_dir}/%(title)s.%(ext)s\" {args} --ffmpeg-location \"{os.path.join(os.getcwd(), 'ffmpeg/bin')}\"", stdout=subprocess.PIPE, text=True)
+            for line in iter(process.stdout.readline, ""):
+                print(line, end='', flush=True)
+            process.wait()
 
-        # Notify if finished downloading or if an error was encountered
-        if process.returncode == 101:
-            print("Successfully downloaded your newly added videos")
-        elif process.returncode == 1: 
-            print("Couldn't find your liked videos playlist. Make sure you have Firefox installed and you're logged into your Youtube account on Firefox.")
-        elif process.returncode == 0:
-            print("Finished re-downloading all videos")
-        else:
-            print(f"Error Code: {process.returncode}")
+            # Notify if finished downloading or if an error was encountered
+            if process.returncode == 101:
+                print("Successfully downloaded your newly added videos from " + url, flush=True)
+            elif process.returncode == 1: 
+                print(f"Couldn't find your playlist at {url}. If it's one of your private playlists make sure you have Firefox installed and you're logged into your Youtube account on Firefox.", flush=True)
+            elif process.returncode == 0:
+                print("Finished re-downloading all videos from " + url, flush=True)
+            else:
+                print(f"Error Code: {process.returncode}", flush=True)
             
 input("Press Enter to continue...")
