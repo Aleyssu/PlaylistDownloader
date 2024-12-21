@@ -28,6 +28,11 @@ python UpdateSongs.py force_redownload
 ```
 To re-download all of your videos instead of just the newest added ones.
 
+## Configuration
+You can customize where your videos will be downloaded along with which playlists you're downloading from in `config.json`. 
+
+By default, videos are downloaded into the same directory as the script and they're downloaded from your liked videos playlist.
+
 ## Shortcut
 
 If you want to create a shortcut that you can quickly run to update your playlist, use 
