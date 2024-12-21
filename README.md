@@ -1,4 +1,4 @@
-# Personal Youtube playlist video updater
+# About
 
 Automatically downloads music from personal private playlists like your Youtube liked videos or any public Youtube playlists using Python, [yt-dlp](https://github.com/yt-dlp/yt-dlp), and [FFmpeg](https://www.ffmpeg.org/). The compiled FFmpeg build from this repo is from https://github.com/BtbN/FFmpeg-Builds. 
 
