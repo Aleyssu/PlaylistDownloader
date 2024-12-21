@@ -1,10 +1,10 @@
 # Personal Youtube playlist video updater
 
-Automatically downloads music from your Youtube liked videos using Python, [yt-dlp](https://github.com/yt-dlp/yt-dlp), and [FFmpeg](https://www.ffmpeg.org/). The compiled FFmpeg build from this repo is from https://github.com/BtbN/FFmpeg-Builds. 
+Automatically downloads music from personal private playlists like your Youtube liked videos or any public Youtube playlists using Python, [yt-dlp](https://github.com/yt-dlp/yt-dlp), and [FFmpeg](https://www.ffmpeg.org/). The compiled FFmpeg build from this repo is from https://github.com/BtbN/FFmpeg-Builds. 
 
 Yt-dlp downloads the mp3s for you while FFmpeg attaches the video thumbnails to those mp3s.
 
-How does this script work? It pulls your cookies from you Firefox browser to access your liked videos playlist (which is always private). I used Firefox to do this because browser_cookie3 (Python library for getting cookies) is having trouble getting cookies from browsers like Chrome and Edge right now. Note that those cookies contain vital private stuff like login info so don't share them with others. Don't worry, I'm not secretly stealing your cookies with this script, but feel free to read through the source code if that eases your mind.
+How does this script work? It pulls your cookies from you Firefox browser to access your private playlists such as your liked videos playlist. I used Firefox to do this because browser_cookie3 (Python library for getting cookies) is having trouble getting cookies from browsers like Chrome and Edge right now. Note that those cookies contain vital private stuff like login info so don't share them with others. Don't worry, I'm not secretly stealing your cookies with this script, but feel free to read through the source code if that eases your mind.
 
 ## Usage
 
