@@ -2,3 +2,5 @@
 *archive.txt
 *cookies.txt
 *.ipynb
+test.py
+configs/my_config.yaml

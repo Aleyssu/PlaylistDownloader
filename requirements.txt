@@ -2,3 +2,4 @@ requests
 browser_cookie3
 zipfile
 pywin32
+hydra-core

@@ -3,6 +3,8 @@ import os
 import sys
 import subprocess
 import json
+import hydra
+from hydra.core.hydra_config import HydraConfig
 
 # Saves the cookie to a file in Netscape format
 def save_cookies(cookies, filename):
@@ -25,102 +27,103 @@ def save_cookies(cookies, filename):
             file.write(f"{domain}\t{flag}\t{path}\t{secure}\t{expiration}\t{name}\t{value}\n")
     print(f"Cookies saved to {filename}", flush=True)
 
-# Get cookies
-cj = browser_cookie3.firefox(domain_name='youtube.com')
-save_cookies(cj, 'cookies.txt')
+@hydra.main(version_base=None, config_path="configs", config_name="config")
+def main(conf: HydraConfig) -> None:
+    # Get cookies
+    cj = browser_cookie3.firefox(domain_name='youtube.com')
+    save_cookies(cj, 'cookies.txt')
 
-# Check if ffmpeg is downloaded
-prereqs_ready = True
-if not os.path.isfile(os.path.join(os.getcwd(), 'ffmpeg/bin/ffmpeg.exe')):
-    prereqs_ready = False
-    print("FFmpeg not found - attempting to download automatically...", flush=True)
-    import requests
-    import zipfile
-    # Attempt to download ffmpeg
-    try:
-        zip_file_name = 'ffmpeg-n7.1-latest-win64-gpl-7.1.zip'
-        zip_url = f"https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/{zip_file_name}"
+    # Check if ffmpeg is downloaded
+    prereqs_ready = True
+    if not os.path.isfile(os.path.join(os.getcwd(), 'ffmpeg/bin/ffmpeg.exe')):
+        prereqs_ready = False
+        print("FFmpeg not found - attempting to download automatically...", flush=True)
+        import requests
+        import zipfile
+        # Attempt to download ffmpeg
+        try:
+            zip_file_name = 'ffmpeg-n7.1-latest-win64-gpl-7.1.zip'
+            zip_url = f"https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/{zip_file_name}"
 
-        # Download the release zip
-        print(f"Downloading release from {zip_url}...", flush=True)
-        response = requests.get(zip_url, stream=True)
-        response.raise_for_status()  # Raise an error for failed requests
-        
-        # Save the zip file
-        with open(zip_file_name, "wb") as zip_file:
-            for chunk in response.iter_content(chunk_size=8192):
-                zip_file.write(chunk)
-        print(f"Downloaded {zip_file_name}", flush=True)
-        
-        # Extract the zip file
-        print("Extracting contents...", flush=True)
-        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
-            zip_ref.extractall('')
-        os.rename(zip_file_name[:-4], 'ffmpeg')
-        print("Extraction complete.", flush=True)
-        
-        # Delete the zip archive
-        print(f"Deleting the zip file: {zip_file_name}", flush=True)
-        os.remove(zip_file_name)
-        print("Cleanup complete.", flush=True)
-
-        # Check if ffmpeg was properly extracted
-        if not os.path.isfile(os.path.join(os.getcwd(), 'ffmpeg/bin/ffmpeg.exe')):
-            print("There was a problem with extracting the FFmpeg download. Please ensure ffmpeg/bin/ffmpeg.exe exists in the current directory.", flush=True)
-        else:
-            print("FFmpeg successfully installed - continuing...", flush=True)
-            prereqs_ready = True
-    except:
-        print("Could not download FFmpeg automatically - see https://github.com/BtbN/FFmpeg-Builds/releases to download the latest version manually. Please ensure ffmpeg/bin/ffmpeg.exe is in the current directory before trying again.", flush=True)
-
-# Check if yt-dlp is downloaded
-if not os.path.isfile(os.path.join(os.getcwd(), 'yt-dlp.exe')):
-    prereqs_ready = False
-    print("yt-dlp.exe not found - attempting to download automatically...", flush=True)
-    import requests
-    # Attempt to download yt-dlp
-    try:
-        exe_url = "https://github.com/yt-dlp/yt-dlp/releases/download/2024.12.13/yt-dlp.exe"
-
-        # Download the release exe
-        print(f"Downloading release from {exe_url}...", flush=True)
-        response = requests.get(exe_url, stream=True)
-        response.raise_for_status()  # Raise an error for failed requests
-        
-        # Save the zip file
-        with open('yt-dlp.exe', "wb") as exe_file:
-            for chunk in response.iter_content(chunk_size=8192):
-                exe_file.write(chunk)
-        print("Successfully downloaded yt-dlp.exe", flush=True)
-        prereqs_ready = True
-    except:
-        print("Could not download yt-dlp.exe automatically - see https://github.com/yt-dlp/yt-dlp/releases to download the latest version manually. Please ensure yt-dlp.exe is in the current directory before trying again.", flush=True)
-
-if prereqs_ready:
-        with open('config.json') as file:
-            config = json.load(file)
-            target_dir = config['download_directory']
-
-        args = config['args']
-        # Redownload all videos in the playlist even if they're already downloaded
-        if len(sys.argv) > 1 and sys.argv[1] == 'force_redownload':
-            os.remove('archive.txt')
-
-        # Download videos with thumbnails
-        for url in config['playlists']:
-            process = subprocess.Popen(f"./yt-dlp.exe {url} -o \"{target_dir}/%(title)s.%(ext)s\" {args} --ffmpeg-location \"{os.path.join(os.getcwd(), 'ffmpeg/bin')}\"", stdout=subprocess.PIPE, text=True)
-            for line in iter(process.stdout.readline, ""):
-                print(line, end='', flush=True)
-            process.wait()
-
-            # Notify if finished downloading or if an error was encountered
-            if process.returncode == 101:
-                print("Successfully downloaded your newly added videos from " + url, flush=True)
-            elif process.returncode == 1: 
-                print(f"Couldn't find your playlist at {url}. If it's one of your private playlists make sure you have Firefox installed and you're logged into your Youtube account on Firefox.", flush=True)
-            elif process.returncode == 0:
-                print("Finished re-downloading all videos from " + url, flush=True)
-            else:
-                print(f"Error Code: {process.returncode}", flush=True)
+            # Download the release zip
+            print(f"Downloading release from {zip_url}...", flush=True)
+            response = requests.get(zip_url, stream=True)
+            response.raise_for_status()  # Raise an error for failed requests
             
-input("Press Enter to continue...")
+            # Save the zip file
+            with open(zip_file_name, "wb") as zip_file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    zip_file.write(chunk)
+            print(f"Downloaded {zip_file_name}", flush=True)
+            
+            # Extract the zip file
+            print("Extracting contents...", flush=True)
+            with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+                zip_ref.extractall('')
+            os.rename(zip_file_name[:-4], 'ffmpeg')
+            print("Extraction complete.", flush=True)
+            
+            # Delete the zip archive
+            print(f"Deleting the zip file: {zip_file_name}", flush=True)
+            os.remove(zip_file_name)
+            print("Cleanup complete.", flush=True)
+
+            # Check if ffmpeg was properly extracted
+            if not os.path.isfile(os.path.join(os.getcwd(), 'ffmpeg/bin/ffmpeg.exe')):
+                print("There was a problem with extracting the FFmpeg download. Please ensure ffmpeg/bin/ffmpeg.exe exists in the current directory.", flush=True)
+            else:
+                print("FFmpeg successfully installed - continuing...", flush=True)
+                prereqs_ready = True
+        except:
+            print("Could not download FFmpeg automatically - see https://github.com/BtbN/FFmpeg-Builds/releases to download the latest version manually. Please ensure ffmpeg/bin/ffmpeg.exe is in the current directory before trying again.", flush=True)
+
+    # Check if yt-dlp is downloaded
+    if not os.path.isfile(os.path.join(os.getcwd(), 'yt-dlp.exe')):
+        prereqs_ready = False
+        print("yt-dlp.exe not found - attempting to download automatically...", flush=True)
+        import requests
+        # Attempt to download yt-dlp
+        try:
+            exe_url = "https://github.com/yt-dlp/yt-dlp/releases/download/2024.12.13/yt-dlp.exe"
+
+            # Download the release exe
+            print(f"Downloading release from {exe_url}...", flush=True)
+            response = requests.get(exe_url, stream=True)
+            response.raise_for_status()  # Raise an error for failed requests
+            
+            # Save the zip file
+            with open('yt-dlp.exe', "wb") as exe_file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    exe_file.write(chunk)
+            print("Successfully downloaded yt-dlp.exe", flush=True)
+            prereqs_ready = True
+        except:
+            print("Could not download yt-dlp.exe automatically - see https://github.com/yt-dlp/yt-dlp/releases to download the latest version manually. Please ensure yt-dlp.exe is in the current directory before trying again.", flush=True)
+
+    # Download videos if ffmpeg and ytdlp are ready
+    if prereqs_ready:
+            # Redownload all videos in the playlist even if they're already downloaded
+            if conf.force_redownload:
+                os.remove('archive.txt')
+
+            # Download videos with thumbnails
+            for url in conf.playlists:
+                process = subprocess.Popen(f"./yt-dlp.exe {url} -o \"{conf.download_directory}/%(title)s.%(ext)s\" {conf.args} --ffmpeg-location \"{os.path.join(os.getcwd(), 'ffmpeg/bin')}\"", stdout=subprocess.PIPE, text=True)
+                for line in iter(process.stdout.readline, ""):
+                    print(line, end='', flush=True)
+                process.wait()
+
+                # Notify if finished downloading or if an error was encountered
+                if process.returncode == 101:
+                    print("Successfully downloaded your newly added videos from " + url, flush=True)
+                elif process.returncode == 1: 
+                    print(f"Couldn't find your playlist at {url}. If it's one of your private playlists make sure you have Firefox installed and you're logged into your Youtube account on Firefox.", flush=True)
+                elif process.returncode == 0:
+                    print("Finished re-downloading all videos from " + url, flush=True)
+                else:
+                    print(f"Error Code: {process.returncode}", flush=True)
+                
+    input("Press Enter to continue...")
+
+if __name__ == '__main__':
+    main()
