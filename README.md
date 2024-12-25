@@ -9,7 +9,7 @@ How does this script work? It pulls your cookies from you Firefox browser to acc
 ## Configuration
 You can customize where your videos will be downloaded along with which playlists you're downloading from in `configs/config.yaml`. 
 
-By default, videos are downloaded into the same directory as the script and they're downloaded from your liked videos playlist.
+By default, videos are downloaded into the same directory as the script and they're downloaded from just your liked videos playlist.
 
 ## Usage
 
