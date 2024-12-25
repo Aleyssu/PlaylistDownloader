@@ -6,6 +6,11 @@ Yt-dlp downloads the mp3s for you while FFmpeg attaches the video thumbnails to 
 
 How does this script work? It pulls your cookies from you Firefox browser to access your private playlists such as your liked videos playlist. I used Firefox to do this because browser_cookie3 (Python library for getting cookies) is having trouble getting cookies from browsers like Chrome and Edge right now. Note that those cookies contain vital private stuff like login info so don't share them with others. Don't worry, I'm not secretly stealing your cookies with this script, but feel free to read through the source code if that eases your mind.
 
+## Configuration
+You can customize where your videos will be downloaded along with which playlists you're downloading from in `configs/config.yaml`. 
+
+By default, videos are downloaded into the same directory as the script and they're downloaded from your liked videos playlist.
+
 ## Usage
 
 First, you'll need to have Firefox installed and be signed into Youtube in Firefox. Why? Because that's where we're gonna be getting your cookies to access your playlists from.
@@ -14,9 +19,7 @@ Make sure you have Python installed and the requirements. Use
 ```bash
 pip install -r requirements.txt
 ```
-to get them.
-
-Simply put `UpdateSongs.py` in the directory where you want the videos to be downloaded and run it with 
+to get them. Then, simply run `UpdateSongs.py` with 
 ```bash
 python UpdateSongs.py
 ```
@@ -24,14 +27,9 @@ to automatically download all of your videos. Run it again whenever you want to 
 
 Use 
 ```bash
-python UpdateSongs.py force_redownload
+python UpdateSongs.py force_redownload=true
 ```
 To re-download all of your videos instead of just the newest added ones.
-
-## Configuration
-You can customize where your videos will be downloaded along with which playlists you're downloading from in `config.json`. 
-
-By default, videos are downloaded into the same directory as the script and they're downloaded from your liked videos playlist.
 
 ## Shortcut
 

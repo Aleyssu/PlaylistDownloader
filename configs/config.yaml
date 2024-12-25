@@ -1,0 +1,19 @@
+download_directory: "."
+playlists: [
+    "https://www.youtube.com/playlist?list=LL",
+]
+# Arguments passed into yt-dlp. See https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#usage-and-options for all possible arguments
+args: "--ignore-errors --download-archive archive.txt -f ba --cookies cookies.txt --recode-video mp3 --embed-thumbnail --break-on-existing"
+force_redownload: false
+
+
+# You can ignore everything below this point
+defaults:  
+  - _self_  
+  - override hydra/hydra_logging: disabled  
+  - override hydra/job_logging: disabled  
+  
+hydra:  
+  output_subdir: null  
+  run:  
+    dir: .

@@ -1,7 +1,0 @@
-{
-	"download_directory": ".",
-	"playlists": [
-		"https://www.youtube.com/playlist?list=LL"
-	],
-	"args": "--ignore-errors --download-archive archive.txt -f ba --cookies cookies.txt --recode-video mp3 --embed-thumbnail --break-on-existing"
-}
