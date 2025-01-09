@@ -3,7 +3,7 @@ import os
 import sys
 import subprocess
 import json
-import hydra
+from hydra import main as hydra_main
 from hydra.core.hydra_config import HydraConfig
 
 # Saves the cookie to a file in Netscape format
@@ -27,7 +27,7 @@ def save_cookies(cookies, filename):
             file.write(f"{domain}\t{flag}\t{path}\t{secure}\t{expiration}\t{name}\t{value}\n")
     print(f"Cookies saved to {filename}", flush=True)
 
-@hydra.main(version_base=None, config_path="configs", config_name="config")
+@hydra_main(version_base=None, config_path="configs", config_name="config")
 def main(conf: HydraConfig) -> None:
     # Get cookies
     cj = browser_cookie3.firefox(domain_name='youtube.com')
