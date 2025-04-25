@@ -31,6 +31,8 @@ python UpdateSongs.py force_redownload=true
 ```
 To re-download all of your videos instead of just the newest added ones.
 
+When yt-dlp is out of date the downloads may fail. I'll try to keep it up to date on the repo but in-between updates you can find the newest versions [here](https://github.com/yt-dlp/yt-dlp). Just replace the old `yt-dlp.exe` with the new one.
+
 ## Shortcut
 
 If you want to create a shortcut that you can quickly run to update your playlist, use 
