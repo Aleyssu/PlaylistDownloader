@@ -3,4 +3,6 @@
 *cookies.txt
 *.ipynb
 test.py
+config_test.py
 configs/my_config.yaml
+notes.txt

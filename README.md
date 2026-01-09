@@ -15,6 +15,8 @@ By default, videos are downloaded into the same directory as the script and they
 
 First, you'll need to have Firefox installed and be signed into Youtube in Firefox. Why? Because that's where we're gonna be getting your cookies to access your playlists from.
 
+You may also need to install a JavaScript runtime for the latest versions of yt-dlp to work correctly. [Deno](https://deno.com) will work just fine.
+
 Make sure you have Python installed and the requirements. Use
 ```bash
 pip install -r requirements.txt

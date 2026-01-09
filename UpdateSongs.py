@@ -2,11 +2,41 @@ import browser_cookie3
 import os
 import sys
 import subprocess
+import requests
 import json
 from hydra import main as hydra_main
 from hydra.core.hydra_config import HydraConfig
 
-# Saves the cookie to a file in Netscape format
+# For logging 
+class Debug:
+    def info(text):
+        print("[UpdateSongs.py] %s" % text, flush=True)
+
+    def ok(text):
+        print("\033[92mOK: [UpdateSongs.py] %s\033[0m" % text, flush=True)
+
+    def warn(text):
+        print("\033[93mWARNING: [UpdateSongs.py] %s\033[0m" % text, flush=True)
+
+    def error(text):
+        print("\033[91mERROR: [UpdateSongs.py] %s\033[0m" % text, flush=True)
+
+def get_local_ytdlp_version(exe_path="yt-dlp.exe"):
+    result = subprocess.run(
+        [exe_path, "--version"],
+        capture_output=True,
+        text=True
+    )
+    return result.stdout.strip()
+
+def get_latest_ytdlp_version():
+    url = "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    return data["tag_name"]
+
+# Saves the cookie to a file in Netscape format (Redundant due to the '--cookies-from-browser' argument with the latest versions of yt-dlp)
 def save_cookies(cookies, filename):
     with open(filename, 'w') as file:
         # Write the header
@@ -25,13 +55,15 @@ def save_cookies(cookies, filename):
             value = cookie.value
             
             file.write(f"{domain}\t{flag}\t{path}\t{secure}\t{expiration}\t{name}\t{value}\n")
-    print(f"Cookies saved to {filename}", flush=True)
+    Debug.info(f"Cookies saved to {filename}")
 
 @hydra_main(version_base=None, config_path="configs", config_name="config")
 def main(conf: HydraConfig) -> None:
-    # Get cookies
-    cj = browser_cookie3.firefox(domain_name='youtube.com')
-    save_cookies(cj, 'cookies.txt')
+    # Get cookies (Deprecated)
+    # cj = browser_cookie3.firefox(domain_name='youtube.com')
+    # save_cookies(cj, 'cookies.txt')
+
+    Debug.info("Using config '%s'" % HydraConfig.get().job.config_name)
 
     # Check if ffmpeg is downloaded
     # prereqs_ready = True
@@ -77,28 +109,38 @@ def main(conf: HydraConfig) -> None:
     #     except:
     #         print("Could not download FFmpeg automatically - see https://github.com/BtbN/FFmpeg-Builds/releases to download the latest version manually. Please ensure ffmpeg/bin/ffmpeg.exe is in the current directory before trying again.", flush=True)
 
-    # Check if yt-dlp is downloaded
-    # if not os.path.isfile(os.path.join(os.getcwd(), 'yt-dlp.exe')):
-    #     prereqs_ready = False
-    #     print("yt-dlp.exe not found - attempting to download automatically...", flush=True)
-    #     import requests
-    #     # Attempt to download yt-dlp
-    #     try:
-    #         exe_url = "https://github.com/yt-dlp/yt-dlp/releases/download/2024.12.13/yt-dlp.exe"
+    # Check if yt-dlp is present and up to date
+    need_download = False
+    if not os.path.isfile(os.path.join(os.getcwd(), 'yt-dlp.exe')):
+        prereqs_ready = False
+        Debug.warn("yt-dlp.exe not found - attempting to download automatically...")
+        need_download = True
+    if not get_latest_ytdlp_version() == get_local_ytdlp_version():
+        Debug.info("New version for yt-dlp.exe found - attempting to download...")
+        need_download = True
 
-    #         # Download the release exe
-    #         print(f"Downloading release from {exe_url}...", flush=True)
-    #         response = requests.get(exe_url, stream=True)
-    #         response.raise_for_status()  # Raise an error for failed requests
+    if need_download:
+    # Attempt to download latest version of yt-dlp.exe
+        try:
+            exe_url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+
+            # Download the release exe
+            Debug.info(f"Downloading release from {exe_url}...")
+            response = requests.get(exe_url, stream=True)
+            response.raise_for_status()  # Raise an error for failed requests
             
-    #         # Save the zip file
-    #         with open('yt-dlp.exe', "wb") as exe_file:
-    #             for chunk in response.iter_content(chunk_size=8192):
-    #                 exe_file.write(chunk)
-    #         print("Successfully downloaded yt-dlp.exe", flush=True)
-    #         prereqs_ready = True
-    #     except:
-    #         print("Could not download yt-dlp.exe automatically - see https://github.com/yt-dlp/yt-dlp/releases to download the latest version manually. Please ensure yt-dlp.exe is in the current directory before trying again.", flush=True)
+            # Save the zip file
+            with open('yt-dlp.exe', "wb") as exe_file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    exe_file.write(chunk)
+            Debug.info("Successfully downloaded yt-dlp.exe")
+            prereqs_ready = True
+        except:
+            if not prereqs_ready:
+                Debug.error("Could not download yt-dlp.exe automatically - see https://github.com/yt-dlp/yt-dlp/releases to download the latest version manually. Please ensure yt-dlp.exe is in the current directory before trying again.")
+            else:
+                Debug.warn("Could not download and update yt-dlp.exe automatically - see https://github.com/yt-dlp/yt-dlp/releases to download the latest version manually.")
+
     prereqs_ready = True
     # Download videos if ffmpeg and ytdlp are ready
     if prereqs_ready:
@@ -115,13 +157,13 @@ def main(conf: HydraConfig) -> None:
 
             # Notify if finished downloading or if an error was encountered
             if process.returncode == 101:
-                print("Successfully downloaded your newly added videos from " + url, flush=True)
+                Debug.ok("Successfully downloaded your newly added videos from " + url)
             elif process.returncode == 1: 
-                print(f"Couldn't find your playlist at {url}. If it's one of your private playlists make sure you have Firefox installed and you're logged into your Youtube account on Firefox.", flush=True)
+                Debug.error(f"Couldn't find your playlist at {url}. If it's one of your private playlists make sure you have Firefox installed and you're logged into your Youtube account on Firefox.")
             elif process.returncode == 0:
-                print("Finished re-downloading all videos from " + url, flush=True)
+                Debug.ok("Finished re-downloading all videos from " + url, flush=True)
             else:
-                print(f"Error Code: {process.returncode}", flush=True)
+                Debug.error(f"Error Code: '{process.returncode}'. This is likely to do with ytdlp.exe or Youtube's servers. Try again later, and if the issue persists start an issue on my git repo and I'll try to look into it.")
                 
     input("Press Enter to continue...")
 
