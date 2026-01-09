@@ -36,7 +36,7 @@ def get_latest_ytdlp_version():
     data = response.json()
     return data["tag_name"]
 
-# Saves the cookie to a file in Netscape format
+# Saves the cookie to a file in Netscape format (Redundant due to the '--cookies-from-browser' argument with the latest versions of yt-dlp)
 def save_cookies(cookies, filename):
     with open(filename, 'w') as file:
         # Write the header
@@ -59,9 +59,9 @@ def save_cookies(cookies, filename):
 
 @hydra_main(version_base=None, config_path="configs", config_name="config")
 def main(conf: HydraConfig) -> None:
-    # Get cookies
-    cj = browser_cookie3.firefox(domain_name='youtube.com')
-    save_cookies(cj, 'cookies.txt')
+    # Get cookies (Deprecated)
+    # cj = browser_cookie3.firefox(domain_name='youtube.com')
+    # save_cookies(cj, 'cookies.txt')
 
     Debug.info("Using config '%s'" % HydraConfig.get().job.config_name)
 
